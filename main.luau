@@ -211,8 +211,8 @@ Commands.agemeta = function(plr,arg) -- Simple Metatable
 	end	
 	SendServerResponse(plr,"Age data after setting the arg : "..ProperData.Age) -- Display post set Age
 end
-game.Players.PlayerAdded:connect(function(plr)
-	plr.Chatted:connect(function(msg) -- Event of player sending a message
+game.Players.PlayerAdded:Connect(function(plr)
+	plr.Chatted:Connect(function(msg) -- Event of player sending a message
 		msg = string.lower(msg)
 		local SplitToArgs = string.split(string.split(msg,"/")[2] or ""," ") -- splits the message
 		if plr.Character and msg:match("/") and Commands[SplitToArgs[1]] then -- Makes sure that the message contains / and a such Command exsists (also makes sure player has a character, just to make it easier)
