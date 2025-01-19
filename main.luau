@@ -1,4 +1,7 @@
 --This is a Chat command's handler script,This script is only made to be a demo, that's why its usefulness is questionable
+--This is version 3 of this script, with some advice taken, i wish a nice day to who ever is reading this
+--[[PLEASE READ ME : i have done everything i only could do to this script, even asking advice from multiple people who are scripter verified and they didnt know either,
+so please, if you could kindly list me the outdated functions? i dont really know anymore ]]
 local Debris = game:GetService("Debris") -- Defines Debris serv.
 local DS = game:GetService("DataStoreService")
 local PathfindingService = game:GetService("PathfindingService")
@@ -217,5 +220,4 @@ game.Players.PlayerAdded:connect(function(plr)
 		end
 	end)
 end)
---This is version 2 of this script, with some advice taken, i wish a nice day to who ever is reading this
 -- Made by SpaceCow/Corrupted (Sorry for so many comments, i just wanted to make sure it's alright...), please excuse my broken english, I am not native :D
