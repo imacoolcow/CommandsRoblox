@@ -5,8 +5,9 @@ local PathfindingService = game:GetService("PathfindingService")
 local DataStoreMain = DS:GetDataStore("Main") -- Imports a data store
 local REvents = game.ReplicatedStorage.RemoteEvents
 local Commands = {} --Main Commands Table
-local AnimInstance = Instance.new("Animation",workspace) -- make new anim instance
+local AnimInstance = Instance.new("Animation") -- make new anim instance
 AnimInstance.AnimationId = "rbxassetid://106938228468653" -- Set to a waving animation
+AnimInstance.Parent = workspace
 local function SendServerResponse(plr,txt)
 	REvents.ServerMessage:FireClient(plr,txt) -- Send server reply, to a simple local script, for some functions
 end
@@ -23,21 +24,23 @@ Commands.teleport = function(plr,arg)  -- teleport player in random place, the a
 	if not tonumber(arg) then
 		return
 	end
-	plr.Character:PivotTo(plr.Character.PrimaryPart.CFrame + Vector3.new(math.random(arg*-1,arg),0,math.random(arg*-1,arg)))
+	plr.Character:PivotTo(plr.Character.HumanoidRootPart.CFrame + Vector3.new(math.random(arg*-1,arg),0,math.random(arg*-1,arg)))
 end
 Commands.run = function(plr) -- Command that makes the player move forward, with a LinearVelocity
-	local rpart = plr.Character.PrimaryPart -- for code's lenght sake
-	local Veloc = Instance.new("LinearVelocity", plr.Character.PrimaryPart) -- Makes a new LinearVelocity
+	local rpart = plr.Character.HumanoidRootPart -- for code's lenght sake
+	local Veloc = Instance.new("LinearVelocity") -- Makes a new LinearVelocity
 	local att = rpart.RootAttachment -- FindRootAttachment
 	Veloc.Attachment0 = att -- set attachment to a new one inside primpart
 	Veloc.MaxForce = math.huge -- not limiting force
 	Veloc.VectorVelocity =rpart.CFrame.LookVector * 40 -- So player runs forward
+	Veloc.Parent = plr.Character.HumanoidRootPart
 	Debris:AddItem(Veloc,2) -- Destroyed after 2 sec
 end
 Commands.part = function(plr) -- Random color part function
-	local Part = Instance.new("Part",workspace) -- Spawn part in workspace
-	Part.Position = plr.Character.PrimaryPart.Position + Vector3.new(0,3,0) -- Set part's position a top of the player
+	local Part = Instance.new("Part") -- Spawn part in workspace
+	Part.Position = plr.Character.HumanoidRootPart.Position + Vector3.new(0,3,0) -- Set part's position a top of the player
 	Part.Color = Color3.fromRGB(math.random(1,255),math.random(1,255),math.random(1,255)) -- Just For Fun set random color
+	Part.Parent = workspace	
 end
 Commands.savelast = function(plr) -- Command, to showcase simple Data store manipulation
 	DataStoreMain:SetAsync("LastVisitor",plr.Name)  -- Save it
@@ -51,15 +54,18 @@ end
 Commands.ragdoll = function(plr) -- command to make the player ragdoll
 	for i,joint in plr.Character:GetDescendants() do -- Check all desecandts
 		if joint:IsA("Motor6D") then -- To see if its a motor 6
-			local socketC = Instance.new("BallSocketConstraint",joint.Parent) -- New Socket
-			local att0 = Instance.new("Attachment",joint.Part0) -- New attachments for the sockets
-			local att1 = Instance.new("Attachment",joint.Part1)
+			local socketC = Instance.new("BallSocketConstraint") -- New Socket
+			local att0 = Instance.new("Attachment") -- New attachments for the sockets
+			local att1 = Instance.new("Attachment")
 			att0.CFrame = joint.C0 -- Set attachment's CFrame's to match the existing ones
 			att1.CFrame = joint.C1
+			att0.Parent = joint.Part0
+			att1.Parent = joint.Part1
 			socketC.Attachment0 = att0 -- set Sockets attachments to the one's that were just made
 			socketC.Attachment1 = att1
 			socketC.TwistLimitsEnabled = true -- Set limits so the player dosent fly away 
 			socketC.LimitsEnabled = true
+			socketC.Parent = joint.Parent
 			joint.Enabled = false -- Disable Motor6D
 		end
 	end
@@ -67,12 +73,14 @@ Commands.ragdoll = function(plr) -- command to make the player ragdoll
 end
 Commands.meteor = function(plr) -- make meteors that fall at diffrent speeds
 	for i=1,20 do		--Loop spawning meteors
-		local meteor = Instance.new("Part",workspace)
+		local meteor = Instance.new("Part")
 		meteor.Size = Vector3.new(5,5,5) 
 		meteor.Color = Color3.fromRGB(255, 149, 0)
 		meteor.CFrame = CFrame.new(math.random(-250,250),200,math.random(-250,250)) -- spawn at random positions
-		local attach = Instance.new("Attachment",meteor) -- Make an attachment
-		local Vel = Instance.new("LinearVelocity",attach) -- Make an Linear Velocity
+		local attach = Instance.new("Attachment") -- Make an attachment
+		attach.Parent = workspace
+		local Vel = Instance.new("LinearVelocity") -- Make an Linear Velocity
+		Vel.Parent = workspace
 		Vel.Attachment0 = attach -- Since LineanVelocity requires an Attachment
 		Vel.MaxForce = math.huge -- Do not limit max force
 		Vel.VectorVelocity = Vector3.new(0, math.random(-125, -75), 0) -- Set Velocity to random 
@@ -83,18 +91,20 @@ Commands.meteor = function(plr) -- make meteors that fall at diffrent speeds
 			end
 			Vel:Destroy() -- destroy velocity, it landed alr
 			exploded = true
-			local Explosion = Instance.new("Explosion",meteor) -- Add an explosion
+			local Explosion = Instance.new("Explosion") -- Add an explosion
 			Explosion.Position = meteor.Position -- Set its position ot the one of the Meteor's
+			Explosion.Parent = workspace
 			Debris:AddItem(meteor,2.5) -- Remove with Debris after 4.5 sec
 		end) 
+		meteor.Parent = workspace
 	end
 end
 local radius = 10 -- set radius
 Commands.orbit = function(plr) -- Some math functionality, orbiting balls around player (sin/cos)
-	local rpart = plr.Character.PrimaryPart -- for code's lenght sake
+	local rpart = plr.Character.HumanoidRootPart -- for code's lenght sake
 	local BallTab = {} -- Tables to store balls
 	for i=1,5 do -- Loop that spawns 5 balls 
-		local Ball = Instance.new("Part",workspace) -- spawning Ball to orbit
+		local Ball = Instance.new("Part") -- spawning Ball to orbit
 		Ball.Anchored = true
 		Ball.Size = Vector3.new(3,3,3) 
 		Ball.Shape = Enum.PartType.Ball -- Make it a Ball
@@ -102,6 +112,7 @@ Commands.orbit = function(plr) -- Some math functionality, orbiting balls around
 		Ball.CanCollide = false -- Make the ball not colide so it dosen't act weirdly
 		table.insert(BallTab,Ball) -- Insert the Ball to the table
 		Debris:AddItem(Ball,7.5)
+		Ball.Parent = workspace
 	end
 	local angle = 0
 	while true do -- Parent Loop (not actually infinite)
@@ -129,7 +140,7 @@ Commands.settime = function(plr,arg) -- A command that sets the time of day
 	end
 end
 Commands.raycast = function(plr) -- Raycast showace (raycast between the floating pink part and players rpart)
-	local rpart = plr.Character.PrimaryPart -- for code's lenght and readabilty's sake
+	local rpart = plr.Character.HumanoidRootPart -- for code's lenght and readabilty's sake
 	local RayParm = RaycastParams.new() -- New ray params
 	RayParm.FilterType = Enum.RaycastFilterType.Exclude
 	RayParm.FilterDescendantsInstances = {plr.Character,workspace.RayPart} -- Filter out the part it self and the player's rig
@@ -164,11 +175,11 @@ Commands.followers = function(plr,arg) -- Create an x amount of dummies that dol
 		Rig.Parent = workspace
 		Rig:PivotTo(CFrame.new(math.random(-250,250),0,math.random(-250,250))) -- spawn the rig at random locations near spawn point
 		local function Follower()
-			Path:ComputeAsync(Rig.PrimaryPart.Position,plr.Character.PrimaryPart.Position) -- Caluclates path between those two
+			Path:ComputeAsync(Rig.HumanoidRootPart.Position,plr.Character.HumanoidRootPart.Position) -- Caluclates path between those two
 			if #Path:GetWaypoints() >= 3 and Rig.Parent then -- If path has atleast 3 way points
 				Rig.Humanoid:MoveTo(Path:GetWaypoints()[3].Position) -- walk to the third one (common PathFinding technique)
 			elseif #Path:GetWaypoints() < 3 and plr.Character and Rig.Parent then -- if it has less...
-				Rig.Humanoid:MoveTo(plr.Character.PrimaryPart.Position) -- walk directly to the player
+				Rig.Humanoid:MoveTo(plr.Character.HumanoidRootPart.Position) -- walk directly to the player
 			end		
 		end
 		task.spawn(function() -- so the for loop can continue
