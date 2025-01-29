@@ -1,9 +1,7 @@
 --This is a Chat command's handler script,This script is only made to be a demo, that's why its usefulness is questionable
---This is version 3 of this script, with some advice taken, i wish a nice day to who ever is reading this
---[[PLEASE READ ME : i have done everything i only could do to this script, even asking advice from multiple people who are scripter verified and they didnt know either,
-so please, if you could kindly list me the outdated functions? i dont really know anymore ]]
 local Debris = game:GetService("Debris") -- Defines Debris serv.
 local DS = game:GetService("DataStoreService")
+local TS = game:GetService("TweenService")
 local PathfindingService = game:GetService("PathfindingService")
 local DataStoreMain = DS:GetDataStore("Main") -- Imports a data store
 local REvents = game.ReplicatedStorage.RemoteEvents
@@ -79,6 +77,7 @@ Commands.meteor = function(plr) -- make meteors that fall at diffrent speeds
 		local meteor = Instance.new("Part")
 		meteor.Size = Vector3.new(5,5,5) 
 		meteor.Color = Color3.fromRGB(255, 149, 0)
+		meteor.Material = Enum.Material.SmoothPlastic
 		meteor.CFrame = CFrame.new(math.random(-250,250),200,math.random(-250,250)) -- spawn at random positions
 		local attach = Instance.new("Attachment") -- Make an attachment
 		attach.Parent = meteor
@@ -111,6 +110,7 @@ Commands.orbit = function(plr) -- Some math functionality, orbiting balls around
 		Ball.Anchored = true
 		Ball.Size = Vector3.new(3,3,3) 
 		Ball.Shape = Enum.PartType.Ball -- Make it a Ball
+		Ball.Material = Enum.Material.SmoothPlastic -- make it smooth plastic
 		Ball.Color = Color3.fromRGB(255, 0, 0)
 		Ball.CanCollide = false -- Make the ball not colide so it dosen't act weirdly
 		table.insert(BallTab,Ball) -- Insert the Ball to the table
@@ -136,7 +136,8 @@ Commands.settime = function(plr,arg) -- A command that sets the time of day
 		["noon"] = 12,
 		["afternoon"] = 16,
 		["evening"]= 19,
-		["midnight"] = 0
+		["midnight"] = 0,
+		["dawn"] = 6, 
 	}
 	if DynamicTime[arg] then -- if arguemnt is in the times table
 		game.Lighting.TimeOfDay = DynamicTime[arg] -- set time of day to it 
@@ -210,6 +211,34 @@ Commands.agemeta = function(plr,arg) -- Simple Metatable
 		ProperData.Age = arg
 	end	
 	SendServerResponse(plr,"Age data after setting the arg : "..ProperData.Age) -- Display post set Age
+end
+Commands.wraptime = function(plr)-- Creates a funny time wrap effect
+	local Human = plr.Character.Humanoid -- Defines Huanoid
+	local shockwave = Instance.new("Part") -- All part configuration, described in other parts
+	shockwave.Shape = Enum.PartType.Ball
+	shockwave.CFrame = plr.Character.HumanoidRootPart.CFrame
+	shockwave.Color = Color3.fromRGB(255,255,255)
+	shockwave.Transparency = 0.5
+	shockwave.Size = Vector3.new(0,0,0)
+	shockwave.Material = Enum.Material.SmoothPlastic
+	shockwave.CanCollide = false
+	shockwave.Anchored = true
+	shockwave.CastShadow = false
+	shockwave.Parent = workspace
+	TS:Create(shockwave,TweenInfo.new(5),{Size = Vector3.new(200,200,200),Transparency = 1}):Play() -- Make it grow and become invisible
+	local Blur = Instance.new("BlurEffect")
+	Blur.Size = 15
+	Blur.Parent = game.Lighting
+	TS:Create(Blur,TweenInfo.new(5),{Size = 0}):Play()
+	Debris:AddItem(shockwave,5)
+	Debris:AddItem(Blur,5)
+	Human.JumpPower = 75
+	workspace.Gravity = 30
+	task.wait(8)
+	workspace.Gravity = 196.2
+	if Human then
+		Human.JumpPower = 50
+	end
 end
 game.Players.PlayerAdded:Connect(function(plr)
 	plr.Chatted:Connect(function(msg) -- Event of player sending a message
